@@ -1,0 +1,1 @@
+vendored from paramkaur10/py-q-nas @ ad3cbc6ad80a33a16cc10169547a5ee2cc81c42d (2026-07-22 12:42:55 +0000)
