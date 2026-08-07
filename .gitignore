@@ -31,3 +31,15 @@ __pycache__/
 # --- OS cruft ---
 .DS_Store
 models_traced/
+
+# ── training outputs ──
+models_traced/
+logs/
+
+# ── simulator binaries ──
+simulator/
+executables/
+
+# ── notebook outputs ──
+notebooks/.ipynb_checkpoints/
+training/.ipynb_checkpoints/
