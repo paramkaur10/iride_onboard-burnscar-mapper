@@ -1,0 +1,381 @@
+"""
+preprocessing.py
+================
+Framework-agnostic preprocessing for the IRIDE burnt-area segmentation dataset.
+
+All functions are pure numpy — no PyTorch dependency — so they can be imported
+in any context: training dataloader, evaluation script, or inference pipeline.
+
+Pipeline (applied in this order at train time):
+  1. to_reflectance()       — divide raw uint16 DN by sensor-specific scale factor
+  2. robust_normalize()     — per-image, per-band percentile normalization (OCM-style)
+  3. remap_mask_to_train_ids() — map raw mask values to contiguous 0-5 train IDs
+  4. train_augment()        — stochastic augmentation (only during training)
+     └─ random_gsd_jitter() — resize ±2× to simulate different GSDs (2.5m–10m)
+     └─ random_flip_rotate() — 8-way dihedral group
+     └─ random_band_gain_jitter() — per-band ×U(0.9,1.1), simulates SRF variation
+     └─ random_brightness_contrast() — global brightness/contrast jitter
+  OR eval_transform()       — normalization only, no augmentation (val/test)
+
+Class legend (raw mask values -> train IDs):
+  0   clear          -> 0
+  2   fresh burn     -> 1   (<=90 days since fire)
+  3   old burn       -> 2   (>90 days since fire)
+  4   cloud          -> 3
+  5   cloud shadow   -> 4
+  6   water          -> 5
+  255 nodata         -> -1  (ignore_index in loss)
+"""
+
+import numpy as np
+
+# ── Band layout ──────────────────────────────────────────────────────────────
+# Both PhiSat-2 simulated and HEO exports use the identical 7-band layout:
+# Index  0     1     2     3     4     5     6
+# Band   B     G     R    RE1   RE2   RE3   NIR
+# S2 ID  B02   B03   B04   B05   B06   B07   B08
+BAND_NAMES = ["B", "G", "R", "RE1", "RE2", "RE3", "NIR"]
+N_BANDS = 7
+RED_IDX = 2   # B04 / Red  — used for NDVI
+NIR_IDX = 6   # B08 / NIR  — used for NDVI
+
+# ── Class legend ─────────────────────────────────────────────────────────────
+MASK_CLEAR, MASK_FRESH, MASK_OLD = 0, 2, 3
+MASK_CLOUD, MASK_SHADOW, MASK_WATER, MASK_NODATA = 4, 5, 6, 255
+
+CLASS_TO_TRAIN_ID = {
+    0:   0,    # clear
+    2:   1,    # fresh burn
+    3:   2,    # old burn
+    4:   3,    # cloud
+    5:   4,    # cloud shadow
+    6:   5,    # water
+    255: -1,   # nodata  — ignore_index, not penalised by the loss
+}
+N_CLASSES = 6
+
+TRAIN_ID_TO_NAME = {
+    0: "clear",
+    1: "fresh_burn",
+    2: "old_burn",
+    3: "cloud",
+    4: "cloud_shadow",
+    5: "water",
+    -1: "nodata (ignore)",
+}
+
+# ── Quantification (source-specific DN → reflectance scale factors) ───────────
+# PhiSat-2 simulated: we chose ×10000 to match Sentinel-2 L1C convention.
+# HEO L1C native   : 4094 (12-bit ADC, confirmed from product XML).
+# Dividing raw uint16 DN by these gives true 0–1 TOA reflectance.
+QUANTIFICATION = {
+    "phisat2_sim": 10_000.0,
+    "heo":          4_094.0,
+}
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# 1. Radiometric conversion
+# ═════════════════════════════════════════════════════════════════════════════
+
+def to_reflectance(img_dn: np.ndarray, scale: float) -> np.ndarray:
+    """
+    Convert raw sensor DN values to TOA reflectance.
+
+    Parameters
+    ----------
+    img_dn : np.ndarray, shape (C, H, W), dtype uint16
+        Raw digital numbers as stored in the .npy tile.
+    scale : float
+        Quantification factor recorded in tiles_index.csv ('scale' column).
+        10000.0 for PhiSat-2 simulated tiles; 4094.0 for HEO tiles.
+
+    Returns
+    -------
+    np.ndarray, shape (C, H, W), dtype float32
+        TOA reflectance in the range [0, ~1.5] (cloud tops can exceed 1.0).
+    """
+    return img_dn.astype(np.float32) / np.float32(scale)
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# 2. Robust per-image normalisation  (OCM-style, the core portability trick)
+# ═════════════════════════════════════════════════════════════════════════════
+
+def robust_normalize(
+    img_refl: np.ndarray,
+    valid_mask: np.ndarray,
+    p_low: float = 1.0,
+    p_high: float = 99.0,
+    eps: float = 1e-6,
+) -> np.ndarray:
+    """
+    Per-image, per-band robust percentile normalisation.
+
+    Each band is independently scaled so that its [p_low, p_high] percentile
+    range maps to [0, 1], computed from THIS image's valid (non-nodata) pixels.
+    This is why the model generalises across sensors and GSDs without ever
+    seeing a fixed dataset-wide mean/std — sensor brightness differences,
+    atmospheric variation, and GSD changes are all absorbed here.
+
+    Parameters
+    ----------
+    img_refl : np.ndarray, shape (C, H, W), float32
+        TOA reflectance (output of to_reflectance).
+    valid_mask : np.ndarray, shape (H, W), bool
+        True where mask != 255 (nodata). Percentiles are computed only
+        over valid pixels to avoid nodata borders skewing the range.
+    p_low, p_high : float
+        Percentile bounds. Default 1/99 clips the extremes while retaining
+        the full dynamic range, matching the OmniCloudMask convention.
+    eps : float
+        Prevents division by zero when a band has no dynamic range.
+
+    Returns
+    -------
+    np.ndarray, shape (C, H, W), float32, values clipped to [0, 1].
+    """
+    out = np.empty_like(img_refl, dtype=np.float32)
+    for b in range(img_refl.shape[0]):
+        px = img_refl[b][valid_mask]
+        if px.size < 100:
+            # degenerate tile (almost entirely nodata) — safe neutral range
+            lo, hi = 0.0, 0.5
+        else:
+            lo, hi = np.percentile(px, [p_low, p_high])
+            if hi - lo < eps:
+                hi = lo + eps
+        out[b] = np.clip((img_refl[b] - lo) / (hi - lo), 0.0, 1.0)
+    return out
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# 3. Mask remapping
+# ═════════════════════════════════════════════════════════════════════════════
+
+def remap_mask_to_train_ids(mask: np.ndarray) -> np.ndarray:
+    """
+    Map raw uint8 mask values {0,2,3,4,5,6,255} to contiguous int64 train IDs
+    {0,1,2,3,4,5,-1}.
+
+    -1 is the ignore_index used by CrossEntropyLoss — nodata pixels never
+    contribute to the gradient, preventing the model from learning to predict
+    nodata as a class.
+
+    Parameters
+    ----------
+    mask : np.ndarray, shape (H, W), dtype uint8
+        Raw mask tile as saved by the tiling notebook.
+
+    Returns
+    -------
+    np.ndarray, shape (H, W), dtype int64
+    """
+    out = np.full(mask.shape, -1, dtype=np.int64)
+    for src, dst in CLASS_TO_TRAIN_ID.items():
+        out[mask == src] = dst
+    return out
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# 4. Augmentation helpers
+# ═════════════════════════════════════════════════════════════════════════════
+
+def random_flip_rotate(
+    img: np.ndarray,
+    mask: np.ndarray,
+    rng: np.random.Generator,
+) -> tuple:
+    """
+    8-way dihedral group augmentation: horizontal flip, vertical flip,
+    and 0/90/180/270° rotation, applied identically to image and mask.
+
+    Masks use the same spatial transform because label semantics are
+    rotation-invariant for top-down satellite imagery.
+    """
+    # horizontal flip
+    if rng.random() < 0.5:
+        img  = img[:, :, ::-1]
+        mask = mask[:, ::-1]
+    # vertical flip
+    if rng.random() < 0.5:
+        img  = img[:, ::-1, :]
+        mask = mask[::-1, :]
+    # 90° rotation (k times)
+    k = rng.integers(0, 4)
+    if k:
+        img  = np.rot90(img,  k, axes=(1, 2))
+        mask = np.rot90(mask, k, axes=(0, 1))
+    return np.ascontiguousarray(img), np.ascontiguousarray(mask)
+
+
+def random_gsd_jitter(
+    img: np.ndarray,
+    mask: np.ndarray,
+    rng: np.random.Generator,
+    scale_range: tuple = (0.5, 2.0),
+    out_size: tuple = None,
+) -> tuple:
+    """
+    Simulate acquisition at a different ground sample distance (GSD).
+
+    Randomly rescales the tile by a factor in scale_range (0.5× = 2× coarser,
+    2.0× = 2× finer), then centre-crops or pads back to out_size. This makes
+    the model invariant to the pixel width of burned scars and cloud structures,
+    covering the full deployment range from 2.5 m (HEO) to 10 m (Sentinel-2).
+
+    Images are bilinear-interpolated; masks are nearest-neighbour (never invent
+    intermediate class IDs by blending).
+
+    Parameters
+    ----------
+    img  : np.ndarray, shape (C, H, W), float32, normalised to [0, 1]
+    mask : np.ndarray, shape (H, W), int64, train IDs in {-1, 0..5}
+    rng  : numpy Generator
+    scale_range : (min_scale, max_scale), default (0.5, 2.0)
+    out_size : (H_out, W_out), defaults to the input tile size (H, W)
+    """
+    import cv2
+    C, H, W = img.shape
+    out_size = out_size or (H, W)
+    factor   = rng.uniform(*scale_range)
+    nH, nW   = max(8, round(H * factor)), max(8, round(W * factor))
+
+    img_r = np.stack([
+        cv2.resize(img[c], (nW, nH), interpolation=cv2.INTER_LINEAR)
+        for c in range(C)
+    ])
+    mask_r = cv2.resize(
+        mask.astype(np.int32), (nW, nH), interpolation=cv2.INTER_NEAREST
+    ).astype(np.int64)
+
+    oH, oW = out_size
+
+    def _fit(a, fill_value):
+        h, w = a.shape[-2], a.shape[-1]
+        ph, pw = max(0, oH - h), max(0, oW - w)
+        if ph or pw:
+            pad = [(0, 0)] * (a.ndim - 2) + [
+                (ph // 2, ph - ph // 2), (pw // 2, pw - pw // 2)
+            ]
+            a = np.pad(a, pad, mode="constant", constant_values=fill_value)
+            h, w = a.shape[-2], a.shape[-1]
+        y0, x0 = (h - oH) // 2, (w - oW) // 2
+        return a[..., y0:y0+oH, x0:x0+oW]
+
+    return _fit(img_r, 0.0), _fit(mask_r, -1)
+
+
+def random_band_gain_jitter(
+    img: np.ndarray,
+    rng: np.random.Generator,
+    gain_range: tuple = (0.9, 1.1),
+) -> np.ndarray:
+    """
+    Per-band multiplicative gain jitter.
+
+    Multiplies each spectral band by an independent random factor drawn from
+    U(gain_range). This simulates the calibration and spectral-response-function
+    (SRF) differences between sensors that nominally cover the same wavelength
+    band — a key source of domain shift between PhiSat-2 simulated and real HEO.
+
+    Values are clipped to [0, 1] after jitter.
+    """
+    gains = rng.uniform(*gain_range, size=(img.shape[0], 1, 1)).astype(np.float32)
+    return np.clip(img * gains, 0.0, 1.0)
+
+
+def random_brightness_contrast(
+    img: np.ndarray,
+    rng: np.random.Generator,
+    brightness: float = 0.1,
+    contrast: float = 0.1,
+) -> np.ndarray:
+    """
+    Global (all-band) brightness and contrast jitter.
+
+    Shifts the image mean by ±brightness and scales deviations from the mean
+    by a random contrast factor. Applied after per-band gain jitter so the two
+    augmentations are independent.
+    """
+    b = rng.uniform(-brightness, brightness)
+    c = 1.0 + rng.uniform(-contrast, contrast)
+    mean = img.mean()
+    return np.clip((img - mean) * c + mean + b, 0.0, 1.0)
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# 5. Top-level transforms (called from TileDataset.__getitem__)
+# ═════════════════════════════════════════════════════════════════════════════
+
+def train_augment(
+    img_refl: np.ndarray,
+    mask_train_id: np.ndarray,
+    valid_mask: np.ndarray,
+    rng: np.random.Generator,
+    cfg: dict = None,
+) -> tuple:
+    """
+    Full training transform: normalise + augment.
+
+    Parameters
+    ----------
+    img_refl     : (C, H, W) float32, output of to_reflectance
+    mask_train_id: (H, W)    int64,   output of remap_mask_to_train_ids
+    valid_mask   : (H, W)    bool,    True where mask != 255
+    rng          : numpy Generator (created fresh per tile in the dataloader)
+    cfg          : optional dict of override kwargs:
+        p_low / p_high         — normalisation percentiles
+        gsd_scale_range        — (min, max) GSD jitter factor
+        gain_range             — per-band gain jitter range
+        brightness / contrast  — brightness/contrast jitter magnitude
+        gsd_jitter             — bool, default True
+        band_gain_jitter       — bool, default True
+        brightness_contrast    — bool, default True
+
+    Returns
+    -------
+    (img, mask) — (C,H,W) float32 in [0,1], (H,W) int64 in {-1,0..5}
+    """
+    cfg = cfg or {}
+    img = robust_normalize(
+        img_refl, valid_mask,
+        cfg.get("p_low", 1.0), cfg.get("p_high", 99.0)
+    )
+    if cfg.get("gsd_jitter", True):
+        img, mask_train_id = random_gsd_jitter(
+            img, mask_train_id, rng,
+            scale_range=cfg.get("gsd_scale_range", (0.5, 2.0))
+        )
+    img, mask_train_id = random_flip_rotate(img, mask_train_id, rng)
+    if cfg.get("band_gain_jitter", True):
+        img = random_band_gain_jitter(
+            img, rng, gain_range=cfg.get("gain_range", (0.9, 1.1))
+        )
+    if cfg.get("brightness_contrast", True):
+        img = random_brightness_contrast(
+            img, rng,
+            brightness=cfg.get("brightness", 0.1),
+            contrast=cfg.get("contrast", 0.1)
+        )
+    return img, mask_train_id
+
+
+def eval_transform(
+    img_refl: np.ndarray,
+    mask_train_id: np.ndarray,
+    valid_mask: np.ndarray,
+    cfg: dict = None,
+) -> tuple:
+    """
+    Evaluation transform: normalise only, no augmentation.
+
+    Deterministic — same input always produces the same output.
+    Used for validation and test dataloaders.
+    """
+    cfg = cfg or {}
+    img = robust_normalize(
+        img_refl, valid_mask,
+        cfg.get("p_low", 1.0), cfg.get("p_high", 99.0)
+    )
+    return img, mask_train_id
