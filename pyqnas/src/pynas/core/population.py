@@ -812,6 +812,7 @@ class Population:
                 input_width=self.dm.input_shape[2],
                 num_classes=self.dm.num_classes,
                 encoder_only=False,
+                MaxParams=self.max_parameters,
             )
             valid = True
         elif task == "classification":
