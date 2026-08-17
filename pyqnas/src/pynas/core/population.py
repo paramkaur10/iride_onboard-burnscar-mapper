@@ -148,6 +148,7 @@ class Population:
         max_layers: int,
         dm,
         max_parameters: int = 400_000,
+        min_parameters: int = 0,
         save_directory: Optional[str] = None,
         external_logger_factory: Optional[Callable] = None,
         **kwargs,
@@ -160,9 +161,14 @@ class Population:
             raise ValueError("Data module (dm) cannot be None")
         if not isinstance(max_parameters, int) or max_parameters <= 0:
             raise ValueError(f"max_parameters must be a positive integer, got {max_parameters}")
+        if not isinstance(min_parameters, int) or min_parameters < 0:
+            raise ValueError(f"min_parameters must be a non-negative integer, got {min_parameters}")
+        if min_parameters >= max_parameters:
+            raise ValueError(f"min_parameters ({min_parameters}) must be < max_parameters ({max_parameters})")
 
         self.dm = dm
         self.n_individuals = n_individuals
+        self.min_parameters = min_parameters
         self.max_layers = max_layers
         self.max_parameters = max_parameters
         self.external_logger_factory = external_logger_factory
@@ -571,6 +577,9 @@ class Population:
             if modelSize >= self.max_parameters:
                 self.logger.warning(f"Model too large: {modelSize} parameters (max: {self.max_parameters})")
                 return False
+            if modelSize < self.min_parameters:
+                self.logger.warning(f"Model too small: {modelSize} parameters (min: {self.min_parameters})")
+                return False
             if modelSize is None:
                 self.logger.warning("Model size is None")
                 return False
@@ -746,6 +755,7 @@ class Population:
                     individual.model_size = int(self.evaluate_parameters(model_representation))
                     assert individual.model_size > 0
                     assert individual.model_size < self.max_parameters
+                    assert individual.model_size >= self.min_parameters
                     assert individual.model_size is not None
                     new_population.append(individual)
             except Exception as e:
@@ -777,7 +787,7 @@ class Population:
                     new_arch = getattr(new_individual, 'architecture', None)
                     if new_arch is None:
                         new_arch = str(new_individual.parsed_layers)
-                    if new_arch not in unique_architectures:
+                    if new_arch not in unique_architectures and self.check_individual(new_individual):
                         unique_architectures.add(new_arch)
                         updated_population.append(new_individual)
                         break
