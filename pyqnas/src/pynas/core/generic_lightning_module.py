@@ -162,6 +162,10 @@ class GenericLightningSegmentationNetwork(pl.LightningModule):
         # preserved for Population bookkeeping
         self.last_train_loss = torch.tensor(float("nan"))
         self.last_val_loss   = torch.tensor(float("nan"))
+        # Opt-in LR scheduler. None = old flat-LR behaviour (NAS search default).
+        # Set to an epoch count before trainer.fit() to enable cosine annealing
+        # down to 1% of base LR over that many epochs (winner retrain only).
+        self.scheduler_max_epochs = None
 
     def forward(self, x):
         return self.model(x)
@@ -281,7 +285,12 @@ class GenericLightningSegmentationNetwork(pl.LightningModule):
         return self(x)
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=self.lr)
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+        if self.scheduler_max_epochs is None:
+            return optimizer
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer, T_max=self.scheduler_max_epochs, eta_min=self.lr * 0.01)
+        return {"optimizer": optimizer, "lr_scheduler": scheduler}
 
     def on_fit_start(self):
         self.model.to(self.device)
