@@ -11,6 +11,9 @@ def main():
     parser.add_argument("--fp16-epochs", type=int, default=None)
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--lr", type=float, default=None)
+    parser.add_argument("--class-weights", type=str, default=None,
+                        help="Comma-separated 6 floats overriding CLASS_WEIGHTS, "
+                             "order: clear,fresh_burn,old_burn,cloud,shadow,water")
     args = parser.parse_args()
 
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
@@ -46,7 +49,12 @@ def main():
 
     # softened weights — old_burn was nearly tied with clear's effective
     # (P x weight) pull, which is what caused tonight's collapse
-    CLASS_WEIGHTS = torch.tensor([0.08, 0.22, 0.28, 0.14, 0.14, 0.14], dtype=torch.float32)
+    if args.class_weights:
+        _w = [float(x) for x in args.class_weights.split(",")]
+        assert len(_w) == 6, f"--class-weights needs 6 values, got {len(_w)}"
+        CLASS_WEIGHTS = torch.tensor(_w, dtype=torch.float32)
+    else:
+        CLASS_WEIGHTS = torch.tensor([0.08, 0.22, 0.28, 0.14, 0.14, 0.14], dtype=torch.float32)
 
     pkl = f"{SAVE_DIR}/src/population_{args.gen}.pkl"
     if not os.path.exists(pkl): pkl = f"{SAVE_DIR}/src/population_0.pkl"
