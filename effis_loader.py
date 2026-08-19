@@ -23,8 +23,8 @@ def _read_vector(path):
                        if m.lower().endswith((".geojson", ".json", ".shp", ".gpkg"))), None)
         if vector is None:
             raise ValueError(f"No GeoJSON/shapefile inside {path}: {members}")
-        return gpd.read_file(f"zip://{p}!{vector}")
-    return gpd.read_file(path)
+        return gpd.read_file(f"zip://{p}!{vector}", engine="pyogrio")
+    return gpd.read_file(path, engine="pyogrio")
 
 def load_effis(path, countries=None, start_date=None, end_date=None, min_area_ha=0.0):
     gdf = _read_vector(path)
