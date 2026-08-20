@@ -269,8 +269,7 @@ def random_gsd_jitter(
 def random_band_gain_jitter(
     img: np.ndarray,
     rng: np.random.Generator,
-    gain_range=(0.7, 1.3),
-    p: float = 0.5,
+    gain_range: tuple = (0.9, 1.1),
 ) -> np.ndarray:
     """
     Per-band multiplicative gain jitter.
@@ -280,34 +279,9 @@ def random_band_gain_jitter(
     (SRF) differences between sensors that nominally cover the same wavelength
     band — a key source of domain shift between PhiSat-2 simulated and real HEO.
 
-    Applied with probability p, not unconditionally -- mirrors the internal
-    coin-flip already used by random_flip_rotate() above. Without this, a
-    wide gain_range means every tile gets significantly perturbed on every
-    pass, which removes "close to true calibration" from the training
-    distribution entirely instead of teaching tolerance alongside it.
-    p=0.5 matches the flip/rotate precedent -- a starting value, not derived
-    from anything, worth treating as tunable.
-
-    gain_range accepts either a single (min, max) tuple applied identically
-    to all bands (legacy behavior), or a dict {band_name: (min, max)} for
-    per-band ranges -- worth using once real per-band variance is settled on,
-    since measured cross-spacecraft spread differs meaningfully by band
-    (~60% on blue vs. ~92% on red, per this session's diagnostic). Falls
-    back to (0.9, 1.1) for any band name missing from the dict.
-
     Values are clipped to [0, 1] after jitter.
     """
-    if rng.random() >= p:
-        return img
-
-    if isinstance(gain_range, dict):
-        gains = np.array([
-            rng.uniform(*gain_range.get(name, (0.9, 1.1)))
-            for name in BAND_NAMES
-        ], dtype=np.float32).reshape(-1, 1, 1)
-    else:
-        gains = rng.uniform(*gain_range, size=(img.shape[0], 1, 1)).astype(np.float32)
-
+    gains = rng.uniform(*gain_range, size=(img.shape[0], 1, 1)).astype(np.float32)
     return np.clip(img * gains, 0.0, 1.0)
 
 
@@ -376,9 +350,7 @@ def train_augment(
     img, mask_train_id = random_flip_rotate(img, mask_train_id, rng)
     if cfg.get("band_gain_jitter", True):
         img = random_band_gain_jitter(
-            img, rng,
-            gain_range=cfg.get("gain_range", (0.7, 1.3)),  # widened from (0.9,1.1) -- measured real cross-spacecraft spread was 60-92%, this session
-            p=cfg.get("gain_jitter_p", 0.5),
+            img, rng, gain_range=cfg.get("gain_range", (0.9, 1.1))
         )
     if cfg.get("brightness_contrast", True):
         img = random_brightness_contrast(

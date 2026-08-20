@@ -8,29 +8,6 @@ from dataset import TileDataset
 
 N_BANDS, TILE_SIZE, N_CLASSES = 7, 256, 6
 
-def compute_tile_sampling_weights(df, hard_neg_weight=0.1, floor=0.02, ceiling=0.3):
-    """
-    Single source of truth for WeightedRandomSampler weights, used by both
-    setup() below and any external diagnostic. Pulled out specifically so a
-    diagnostic can import this directly instead of maintaining an
-    independent copy of the formula -- a hand-copied version silently stops
-    detecting real changes the moment this logic changes (happened once
-    already this session).
-
-    Returns a raw (non-normalized) weight array aligned to df's row order.
-    """
-    rare = (df.get("frac_2", 0) + df.get("frac_3", 0) +
-            df.get("frac_4", 0) + df.get("frac_5", 0) + df.get("frac_6", 0)).values
-    hard_neg_signal = np.where(
-        df.get("hard_negative", False).fillna(False).values,
-        hard_neg_weight, 0.0,
-    )
-    # max, not sum -- hard_negative tiles have ~0 rare content by definition
-    # (that's what makes them hard negatives); max() just avoids double-
-    # counting in the unlikely edge case both signals are nonzero.
-    return np.clip(np.maximum(np.maximum(rare, hard_neg_signal), floor), 0, ceiling).astype(np.float64)
-
-
 class BalancedTileDataModule(pl.LightningDataModule):
     def __init__(self, tiles_root, index_csv, batch_size=16, num_workers=4,
                  nas_subset_n=None, seed=42):
@@ -43,19 +20,9 @@ class BalancedTileDataModule(pl.LightningDataModule):
 
     def setup(self, stage=None):
         idx = pd.read_csv(self.index_csv)
-        # heo_train/heo_val/heo_test never matched split=="train" etc. below --
-        # real HEO tiles were silently excluded from every filter. Adds a
-        # derived column for grouping only; `split` itself is left untouched
-        # since curate_and_tile() used it as the on-disk subdirectory name
-        # (processed/dataset_v1/heo_train/... vs processed/dataset_v1/train/...)
-        # -- renaming it here would break file-path resolution downstream.
-        split_group = {"train": "train", "heo_train": "train",
-                       "val": "val", "heo_val": "val",
-                       "test": "test", "heo_test": "test"}
-        idx["split_group"] = idx["split"].map(split_group)
-        train = idx[(idx.split_group=="train") & (idx.gsd=="native")].reset_index(drop=True)
-        val   = idx[(idx.split_group=="val")   & (idx.gsd=="native")].reset_index(drop=True)
-        test  = idx[(idx.split_group=="test")  & (idx.gsd=="native")].reset_index(drop=True)
+        train = idx[(idx.split=="train") & (idx.gsd=="native")].reset_index(drop=True)
+        val   = idx[(idx.split=="val")   & (idx.gsd=="native")].reset_index(drop=True)
+        test  = idx[(idx.split=="test")  & (idx.gsd=="native")].reset_index(drop=True)
 
         if self.nas_n is not None:
             rng = np.random.default_rng(self.seed)
@@ -71,12 +38,10 @@ class BalancedTileDataModule(pl.LightningDataModule):
         self.val_ds   = TileDataset(self.root, val,   is_train=False)
         self.test_ds  = TileDataset(self.root, test,  is_train=False)
 
-        # HARD_NEG_WEIGHT is a starting guess, not a derived value -- re-run
-        # the sampling diagnostic after this change to confirm hard_negative's
-        # weight share actually moved, and treat as a tunable pending a real
-        # ablation rather than a settled constant.
-        w = compute_tile_sampling_weights(train)
-        w = w / w.sum()
+        rare = (train.get("frac_2",0)+train.get("frac_3",0)+
+                train.get("frac_4",0)+train.get("frac_5",0)+train.get("frac_6",0)).values
+        w = np.clip(np.maximum(rare, 0.02), 0, 0.3).astype(np.float64)
+        w /= w.sum()
         self._sampler = WeightedRandomSampler(torch.from_numpy(w).float(),
                                               len(self.train_ds), replacement=True)
 
