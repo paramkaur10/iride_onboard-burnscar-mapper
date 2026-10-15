@@ -1,73 +1,32 @@
+"""The training loss: cross-entropy against the labels, Kullback-Leibler divergence from the teacher's class
+probabilities, optional soft Dice. Pixels without a class (no data, unknown mask values) count in none of them."""
+from __future__ import annotations
+
 import torch
-from torch import nn
 import torch.nn.functional as F
-from typing import Optional
 
 
-class CategoricalCrossEntropyLoss(nn.Module):
-    """Standard cross-entropy. Handles one-hot targets and ignore_index."""
-    def __init__(self, ignore_index: int = -1):
-        super().__init__()
-        self.criterion = nn.CrossEntropyLoss(ignore_index=ignore_index)
-
-    def forward(self, logits, targets):
-        if targets.ndim == 4:
-            targets = torch.argmax(targets, dim=1)
-        return self.criterion(logits, targets)
+def soft_dice(logits, labels):
+    """1 - mean over classes of the soft Dice coefficient, over the pixels with a class (labels >= 0)."""
+    valid = (labels >= 0).unsqueeze(1).float()
+    p = torch.softmax(logits, 1) * valid
+    onehot = F.one_hot(labels.clamp(min=0), logits.shape[1]).permute(0, 3, 1, 2).float() * valid
+    inter = (p * onehot).sum((0, 2, 3))
+    denom = p.sum((0, 2, 3)) + onehot.sum((0, 2, 3))
+    return 1 - ((2 * inter + 1.0) / (denom + 1.0)).mean()
 
 
-class FocalLoss(nn.Module):
-    """
-    Focal loss with class weighting and ignore_index support.
-
-    pt is computed from an UNWEIGHTED cross-entropy so it reflects actual
-    model confidence. Class weight is applied as a separate multiplier on
-    the final per-pixel loss. Previously pt was derived from the WEIGHTED
-    ce, which distorted per-class confidence and made single-class collapse
-    a cheap stable minimum.
-    """
-    def __init__(
-        self,
-        alpha: float = 1.0,
-        gamma: float = 2.0,
-        reduction: str = "mean",
-        weight: Optional[torch.Tensor] = None,
-        ignore_index: int = -1,
-    ):
-        super().__init__()
-        self.alpha        = alpha
-        self.gamma        = gamma
-        self.reduction    = reduction
-        self.weight       = weight
-        self.ignore_index = ignore_index
-
-    def forward(self, logits, targets):
-        if targets.ndim == 4:
-            targets = torch.argmax(targets, dim=1)
-
-        valid_mask   = targets != self.ignore_index
-        targets_safe = targets.clone()
-        targets_safe[~valid_mask] = 0
-
-        # pt from UNWEIGHTED ce — confidence must not be distorted by class weight
-        ce_raw = F.cross_entropy(
-            logits, targets_safe, weight=None,
-            reduction="none", ignore_index=-100,
-        )
-        ce_raw = ce_raw * valid_mask.float()
-        pt           = torch.exp(-ce_raw)
-        focal_weight = self.alpha * (1 - pt) ** self.gamma
-
-        if self.weight is not None:
-            w = self.weight.to(logits.device)[targets_safe]
-        else:
-            w = 1.0
-
-        focal_loss = focal_weight * w * ce_raw
-
-        n_valid = valid_mask.sum().clamp(min=1)
-        if self.reduction == "mean":
-            return focal_loss.sum() / n_valid
-        elif self.reduction == "sum":
-            return focal_loss.sum()
-        return focal_loss
+def loss(logits, labels, t_logp, valid, class_weights=None, kd_weight=0.0, temperature=1.0, dice_weight=0.0):
+    """(1 - kd_weight) x (CE + dice_weight x Dice) + kd_weight x T^2 x KL(teacher || model), the KL averaged over
+    the pixels with data (valid). Computed in FP32. Returns (loss, CE, KL)."""
+    logits = logits.float()
+    zero = logits.sum() * 0.0
+    ce = F.cross_entropy(logits, labels, weight=class_weights, ignore_index=-1) if (labels >= 0).any() else zero
+    sup = ce + (dice_weight * soft_dice(logits, labels) if dice_weight else 0.0)
+    kd = zero
+    if kd_weight > 0 and t_logp is not None:
+        log_q = F.log_softmax(logits / temperature, 1)
+        log_p = F.log_softmax(t_logp / temperature, 1)
+        kl = (log_p.exp() * (log_p - log_q)).sum(1)
+        kd = (kl * valid).sum() / valid.sum().clamp(min=1.0) * temperature ** 2
+    return (1 - kd_weight) * sup + kd_weight * kd, ce, kd
