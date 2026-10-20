@@ -42,6 +42,18 @@ def test_scene_mosaics_and_iou_in_titles():
     fig.savefig(os.path.join(tempfile.mkdtemp(), "scenes.png"))
 
 
+def test_scene_table_counts():
+    s = _set()
+    s["windows"]["role"] = np.where(s["windows"].scene == "A", "train", "test")
+    y = report.labels_of(s, SPEC)
+    t = report.scene_table(s, {"perfect": np.where(y < 0, 0, y).astype(np.uint8)}, SPEC)
+    assert set(t.role) == {"train", "test"} and len(t) == 3            # A at two resolutions, B at one
+    assert (t.iou == 1.0).all() and (t.false_alarms == 0).all() and (t.misses == 0).all()
+    fig = report.plot_scenes(s, {"perfect": np.where(y < 0, 0, y).astype(np.uint8)}, SPEC, scenes=["B"],
+                             tags={"B": "test"}, labels=y)
+    assert fig.axes[0].get_title(loc="left").startswith("B · test")
+
+
 def test_test_iou_bars_and_finalists():
     rows = [dict(label=l, seed=s, precision=p, set=n, gsd=g, iou=0.5 + 0.01 * s)
             for l in ("winner", "smp:Unet:mobilenet_v2", "teacher") for s in (0, 1) for p in ("fp16", "fp32")

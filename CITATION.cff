@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite it as below."
+title: "On-board burn-scar mapping for IRIDE HEO"
+type: software
+authors:
+  - family-names: Thind
+    given-names: Parampuneet Kaur
+    email: parampuneet.thind@uniroma1.it
+repository-code: "https://github.com/paramkaur10/iride_onboard-burnscar-mapper"
+license: MIT
+keywords: [burnt area, wildfire, on-board processing, neural architecture search, Myriad X, IRIDE, HEO, PhiSat-2]
+date-released: 2026-10-20

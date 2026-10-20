@@ -4,8 +4,9 @@
    the baselines ([Final] baselines, fixed smp models) and the ablations of the winner ([Final] ablations: no_kd,
    without distillation; fp32, trained in FP32 with BatchNorm frozen instead of folded, converted afterwards) with
    the same seeds; all scored on the search and validation sets;
-2. deploy(): the winner seed with the best validation score in FP16 is exported as the files ArgOS takes (FP16 IR,
-   compiled for MYRIAD), its IR run on the OpenVINO CPU plugin against PyTorch, and the FP16 / FP32 agreement;
+2. deploy(): the winner seed with the best validation score in FP16 (or any labelled run of a queue, e.g. a
+   finalist) is exported as the files ArgOS takes (FP16 IR, compiled for MYRIAD), its IR run on the OpenVINO CPU
+   plugin against PyTorch, and the FP16 / FP32 agreement;
 3. test(): every final model, the teacher and the deployed one scored once on [Data] test; the result is kept and
    read back afterwards, never computed again unless forced.
 
@@ -22,6 +23,7 @@ with the lowest predicted latency is taken.
 
     q = queue(cfg, "models/pynas/search", "models/pynas/final")   # then runner.launch(q, gpus), runner.wait(q)
     dep = deploy(q, cfg, "models/onboard", "burnscar_pynas")
+    dep = deploy(fq, cfg, "models/onboard", "burnscar_pynas_f4", label="finalist 4", seed=1)   # a finalist instead
     t = test(q, cfg, teacher_queue="models/pynas/teacher/runs/queue.json")
 """
 from __future__ import annotations
@@ -199,25 +201,42 @@ def _val_score(row, cfg, prec="fp16"):
     return np.nan if v is None else v
 
 
-def deploy(q, cfg, out_dir, name, windows=8):
-    """Export the winner seed with the best mean validation score in FP16. Returns a record (also written as
-    <out_dir>/<name>/deploy.json)."""
+def deploy_pick(runs, label="winner", seed=None):
+    """The run deploy() exports, of runs (results() rows with a val_fp16 column): of those labelled label, the one
+    with the given seed, else the one with the best mean validation score in FP16."""
+    sel = runs[runs.label == label]
+    if not len(sel):
+        raise RuntimeError(f"no run labelled {label!r} is done yet")
+    if seed is not None:
+        hit = sel[pd.to_numeric(sel.seed, errors="coerce") == float(seed)]
+        if not len(hit):
+            raise RuntimeError(f"no done run labelled {label!r} with seed {seed}")
+        return hit.iloc[0]
+    return sel.sort_values("val_fp16", ascending=False).iloc[0]
+
+
+def deploy(q, cfg, out_dir, name, windows=8, label="winner", seed=None):
+    """Export a run of q in FP16 as the files ArgOS takes: of the runs labelled label (the winner by default; with
+    the finalist queue e.g. 'finalist 4'), the given seed, else the seed with the best mean validation score in FP16.
+    Returns a record (also written as <out_dir>/<name>/deploy.json)."""
     import torch
     from .hardware import myriad
     from .train import data as D
     from .train.metrics import evaluate, summary
     Q = runner.read_queue(q)
     res = results(q)
-    win = res[res.label == "winner"].copy()
+    win = res[res.label == label].copy()
     if not len(win):
-        raise RuntimeError("no winner run is done yet")
+        raise RuntimeError(f"no run labelled {label!r} is done yet")
     win["val_fp16"] = [_val_score(r, cfg) for _, r in win.iterrows()]
-    pick = win.sort_values("val_fp16", ascending=False).iloc[0]
+    pick = deploy_pick(win, label, seed)
     net = runner.load_result(Path(Q["out"]) / pick.run)
     spec = D.DataSpec.from_config(cfg)
     shape = D.input_shape(spec)
-    rec = dict(name=name, run=pick.run, seed=int(pick.seed), model=pick.model, val_fp16=float(pick.val_fp16),
-               rule=f"winner seed with the best mean validation fresh-burn IoU in FP16 ({cfg.get('Search', 'fitness').strip()})", time=time.strftime("%Y-%m-%d %H:%M:%S"))
+    how = (f"{label}, seed {int(seed)} as given" if seed is not None
+           else f"{label} seed with the best mean validation fresh-burn IoU in FP16")
+    rec = dict(name=name, run=pick.run, label=label, seed=int(pick.seed), model=pick.model, val_fp16=float(pick.val_fp16),
+               rule=f"{how} ({cfg.get('Search', 'fitness').strip()})", time=time.strftime("%Y-%m-%d %H:%M:%S"))
     if myriad.status(cfg)["model_optimizer"]:
         chk = myriad.export_ir(net, out_dir, name, shape, cfg)
         rec.update(ir_mb=chk.get("ir_mb"), compiled=chk.get("compiled"), mapping=chk.get("mapping"), files=chk.get("files"),

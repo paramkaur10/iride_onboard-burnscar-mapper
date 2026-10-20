@@ -1,45 +1,58 @@
-# --- Large / regenerable data ---
-data/
-output/
-processed/
-temp_data/
+# data and trained models: in the private Hugging Face dataset (python scripts/download_data.py)
+data/*
+!data/README.md
+models/
+notebooks_executed/
+
+# not public: Argotec's SDK and the delivery to Argotec
+argos_sdk/
+argos_app/
+deliveries/
+notebooks/11_argos_delivery.ipynb
+notebooks/old/
+
+# the PhiSat-2 simulator of the OrbitalAI challenge: fetched by notebook 01, not redistributed
 executables/
 orbitalAI/
+simulator/
 phisat2_constants.py
 phisat2_utils.py
 phisat2_unix.zip
+
+# large files
 *.tif
 *.tiff
 *.zip
 *.gpkg
+*.npy
+*.pt
 
-# --- Credentials / secrets ---
+# credentials
 .env
 *.key
 *_secret*
 credentials.json
 
-# --- Python ---
+# Python, Jupyter, editors
 __pycache__/
 *.pyc
 .venv/
 *.egg-info/
-
-# --- Jupyter ---
 .ipynb_checkpoints/
-
-# --- OS cruft ---
+.cache/
 .DS_Store
-models_traced/
 
-# ── training outputs ──
-models_traced/
+# run outputs
+output/
+processed/
+temp_data/
 logs/
+models_traced/
+out/
 
-# ── simulator binaries ──
-simulator/
-executables/
-
-# ── notebook outputs ──
-notebooks/.ipynb_checkpoints/
-training/.ipynb_checkpoints/
+# release tools
+prepare_release.py
+release_inventory.*
+release_staging/
+*.tmp_release
+hf_upload*.log

@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.1.3
+
+- `final.deploy(..., label=, seed=)`: exports any labelled run of a queue, not only the winner (e.g. the
+  chosen finalist from the finalist queue, `label="finalist 4"`); with `seed` that seed, else the seed with the
+  best mean validation score in FP16. The record says which label and how the seed was picked.
+  `final.deploy_pick` is that choice on its own.
+
+## 1.1.2
+
+- `data.batch_input(..., input_mask=)`, `metrics.evaluate(..., input_mask=)`, `report.predict_set(..., input_mask=)`:
+  `"labels"` (default, as in training: pixels without a label are set to 0 in the input) or `"image"` (only the
+  image's own no-data pixels, as on board, where there are no labels). The scores always count labelled pixels only.
+- `space.network.n_params_used`: parameters the forward pass reaches (what the exported network holds).
+
+## 1.1.1
+
+- `report.scene_table`: per scene and resolution of a stored set, every model's target IoU, hits, false alarms and
+  misses; `report.plot_scenes(..., tags=, labels=)` shows each scene's split in its title. For reviewing whole
+  scenes of every split (notebook 10); nothing is chosen from it.
+
 ## 1.1.0
 
 - Finalist stage (`[Final] finalists = k`): the k candidates with the best search fitness are trained like final

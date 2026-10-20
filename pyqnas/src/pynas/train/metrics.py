@@ -53,10 +53,11 @@ def scores_of(m, spec):
 
 
 @torch.no_grad()
-def evaluate(model, s, spec, device, precision="fp32", batch=32, agreement=False):
+def evaluate(model, s, spec, device, precision="fp32", batch=32, agreement=False, input_mask="labels"):
     """Scores of model on the stored set s (data.open_set), per resolution and over all ('all' rows), against the
     labels and the teacher. agreement: also the share of pixels with data where the FP16 network and the FP32 one
-    give the same class (attrs['fp16_agreement'])."""
+    give the same class (attrs['fp16_agreement']). input_mask: 'labels' (as in training) or 'image' (only the
+    image's own no-data pixels set to 0 in the input, as on board); the scores always count labelled pixels only."""
     n = len(s["refl"])
     first = batch_input(torch.from_numpy(np.ascontiguousarray(s["refl"][:min(4, n)])).to(device),
                         torch.from_numpy(np.ascontiguousarray(s["mask"][:min(4, n)])).to(device), spec)
@@ -70,7 +71,7 @@ def evaluate(model, s, spec, device, precision="fp32", batch=32, agreement=False
     for k in range(0, n, batch):
         e = min(k + batch, n)
         m = torch.from_numpy(np.ascontiguousarray(s["mask"][k:e])).to(device)
-        x = batch_input(torch.from_numpy(np.ascontiguousarray(s["refl"][k:e])).to(device), m, spec)
+        x = batch_input(torch.from_numpy(np.ascontiguousarray(s["refl"][k:e])).to(device), m, spec, input_mask)
         logits = run(x.half() if precision == "fp16" else x).float()
         pred = logits.argmax(1)
         y = lut[m.long()]

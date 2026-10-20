@@ -168,8 +168,14 @@ def normalise(refl, mask, spec):
     return x.masked_fill((mask == spec.nodata).unsqueeze(1), 0.0)
 
 
-def batch_input(refl, mask, spec):
-    """Network input from a batch of stored values (any device)."""
+def batch_input(refl, mask, spec, input_mask="labels"):
+    """Network input from a batch of stored values (any device). input_mask: which pixels are set to 0 as having
+    no data: 'labels', those whose label is no data (as in training); 'image', only those where the image itself
+    has no data (every band 0), as on board, where there are no labels."""
+    if input_mask == "image":
+        mask = torch.where((refl == 0).all(1), spec.nodata, 0).to(mask.dtype)
+    elif input_mask != "labels":
+        raise ValueError(f"input_mask {input_mask}: 'labels' or 'image'")
     return normalise(refl.float() / spec.scale, mask, spec)
 
 

@@ -8,4 +8,4 @@ the last phase), with distillation from a fixed teacher. See docs/DESIGN.md.
     from pynas.search import driver
     cfg = config.load("configs/burnscar.ini")
 """
-__version__ = "1.1.0"
+__version__ = "1.1.3"

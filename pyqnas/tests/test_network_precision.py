@@ -62,6 +62,21 @@ def test_deploy_copy_half():
     assert all(p.dtype == torch.float16 for p in m16.parameters()) if REAL else True
 
 
+def test_input_mask_image_keeps_unlabelled_image_pixels():
+    import torch
+    if getattr(torch, "__fake__", False):
+        return
+    from pynas.train.data import DataSpec, batch_input
+    spec = DataSpec(mask_values=[0, 2], class_names=["clear", "fresh"], target=1, nodata=255, scale=10000.0)
+    refl = torch.full((1, 3, 4, 4), 1000, dtype=torch.int16)
+    refl[0, :, 0, 0] = 0                                   # the image has no data here
+    mask = torch.zeros((1, 4, 4), dtype=torch.uint8)
+    mask[0, 1, :] = 255                                     # a row without a label, inside the image
+    by_labels, by_image = batch_input(refl, mask, spec, "labels"), batch_input(refl, mask, spec, "image")
+    assert float(by_labels[0, :, 1, 2].abs().sum()) == 0.0 and float(by_image[0, :, 1, 2].abs().sum()) > 0.0
+    assert float(by_image[0, :, 0, 0].abs().sum()) == 0.0
+
+
 if __name__ == "__main__":
     from _run import run
     run(dict(globals()))

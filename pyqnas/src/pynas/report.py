@@ -9,6 +9,7 @@
     plot_test_iou(per_gsd, labels)    target IoU on every test set, over all windows and per resolution
     predict_set(models, spec, s)      class maps of several models on every window of a stored set
     plot_scenes(s, preds, spec)       test scenes as mosaics: image, labels, and each model's hits and misses
+    scene_table(s, preds, spec)       per scene and resolution, every model: target IoU, hits, false alarms, misses
 """
 from __future__ import annotations
 
@@ -153,9 +154,10 @@ def plot_test_iou(per_gsd, labels=None, prec="fp16", sets=None, axes=None):
     return axes
 
 
-def predict_set(models, spec, s, device="cpu", batch=16):
+def predict_set(models, spec, s, device="cpu", batch=16, input_mask="labels"):
     """{name: (network, 'fp16' | 'fp32')} -> {name: class index per pixel, (windows, H, W) uint8} on every window of
-    the stored set s (data.open_set). fp16 runs the network as the Myriad does (precision.deploy_copy)."""
+    the stored set s (data.open_set). fp16 runs the network as the Myriad does (precision.deploy_copy); input_mask
+    as in data.batch_input ('image': as on board)."""
     import torch
     from .train.data import batch_input
     from .train.precision import deploy_copy
@@ -170,7 +172,7 @@ def predict_set(models, spec, s, device="cpu", batch=16):
             pred = np.empty((n,) + tuple(s["mask"].shape[1:]), np.uint8)
             for k in range(0, n, batch):
                 e = min(k + batch, n)
-                x = batch_input(tensor(s["refl"][k:e]), tensor(s["mask"][k:e]), spec)
+                x = batch_input(tensor(s["refl"][k:e]), tensor(s["mask"][k:e]), spec, input_mask)
                 pred[k:e] = run(x.half() if prec == "fp16" else x).float().argmax(1).cpu().numpy()
             out[name] = pred
     return out
@@ -181,10 +183,36 @@ CLASS_COLOURS = {"clear": "#e9e4d8", "fresh": "#d7263d", "old": "#f49d37", "clou
 HIT, FALSE_ALARM, MISS = (1.0, 0.84, 0.0), (1.0, 0.0, 1.0), (0.0, 0.9, 1.0)
 
 
-def _labels(s, spec):
+def labels_of(s, spec):
+    """Class index per pixel of a stored set (-1: no data)."""
     lut = np.full(256, -1, np.int16)
     lut[np.asarray(spec.mask_values)] = np.arange(spec.num_classes)
     return lut[np.asarray(s["mask"])]
+
+
+_labels = labels_of
+
+
+def scene_table(s, preds, spec):
+    """Per scene and resolution of the stored set s (and its role, split or source columns when the window table
+    has them), for every model of preds (predict_set): labelled target pixels, hits, false alarms, misses and the
+    target IoU, counted over the scene's windows as the test scores are (NaN when there is nothing to score)."""
+    win = s["windows"].reset_index(drop=True)
+    y = labels_of(s, spec)
+    f = spec.target
+    keys = ["scene", "gsd"] + [c for c in ("role", "split", "source") if c in win]
+    rows = []
+    for key, g in win.groupby(keys, sort=False):
+        idx = g.index.to_numpy()
+        yy = y[idx]
+        lab = int((yy == f).sum())
+        for name, p in preds.items():
+            pp = p[idx]
+            tp = int(((pp == f) & (yy == f)).sum())
+            fp = int(((pp == f) & (yy != f) & (yy >= 0)).sum())
+            rows.append(dict(zip(keys, key), model=name, labelled_px=lab, hits=tp, false_alarms=fp, misses=lab - tp,
+                             iou=tp / (lab + fp) if lab + fp else np.nan))
+    return pd.DataFrame(rows)
 
 
 def _mosaic(idx, win, size, step, maxpx):
@@ -205,20 +233,22 @@ def _paste(canvas, tiles, r, c, step):
     return canvas
 
 
-def plot_scenes(s, preds, spec, set_name="", scenes=None, max_scenes=3, rgb=(6, 2, 1), maxpx=900, panel=2.6):
+def plot_scenes(s, preds, spec, set_name="", scenes=None, max_scenes=3, rgb=(6, 2, 1), maxpx=900, panel=2.6,
+                tags=None, labels=None):
     """One row per scene and resolution of the stored set s: the image (bands rgb, default NIR, red, green), the
     labels, and for every model of preds (predict_set) the target class: hits (yellow), false alarms (magenta) and
     misses (cyan) over the image, with the IoU of that scene and resolution in the title (over its windows, as the
     test scores count it). Windows are placed by their position in the scene (r0, c0, n of the window table); a
     set that is a sample of windows shows gaps. Scenes: the given ones, else the max_scenes with the most labelled
-    target pixels. Returns the figure."""
+    target pixels. tags: {scene: text} shown after the scene name (e.g. its split); labels: labels_of(s, spec),
+    when already computed. Returns the figure."""
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap
     from matplotlib.patches import Patch
     win = s["windows"].reset_index(drop=True)
     if not {"r0", "c0", "n"} <= set(win):
         raise ValueError("the window table has no r0, c0, n: the windows cannot be placed in their scenes")
-    y = _labels(s, spec)
+    y = labels_of(s, spec) if labels is None else labels
     f = spec.target
     tgt = pd.Series((y == f).sum((1, 2)), index=win.index)
     if scenes is None:
@@ -240,7 +270,8 @@ def plot_scenes(s, preds, spec, set_name="", scenes=None, max_scenes=3, rgb=(6, 
         gaps = lab < 0
         img_show = np.where(gaps[..., None], 1.0, img)
         axes[ri, 0].imshow(img_show)
-        axes[ri, 0].set_title(f"{str(sc)[:22]}\n{g:g} m", fontsize=8, loc="left")
+        tag = f" · {tags[sc]}" if tags and sc in tags else ""
+        axes[ri, 0].set_title(f"{str(sc)[:22]}{tag}\n{g:g} m", fontsize=8, loc="left")
         axes[ri, 1].imshow(np.ma.masked_less(lab, 0), cmap=cmap, vmin=-0.5, vmax=spec.num_classes - 0.5,
                            interpolation="nearest")
         axes[ri, 1].set_facecolor("white")

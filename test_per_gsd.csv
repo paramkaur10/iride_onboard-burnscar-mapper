@@ -1,0 +1,352 @@
+label,seed,precision,set,gsd,iou
+winner,0.0,fp16,heo_test,2.5,0.5044392443105032
+winner,0.0,fp16,heo_test,5.0,0.5150420829900518
+winner,0.0,fp16,heo_test,10.0,0.4246414441147378
+winner,0.0,fp16,heo_test,all,0.5013593914217229
+winner,0.0,fp16,phisat2_test,4.75,0.8825269882334423
+winner,0.0,fp16,phisat2_test,10.0,0.8681414144921338
+winner,0.0,fp16,phisat2_test,all,0.8800404340561403
+winner,0.0,fp16,s2_test,10.0,0.7147648327078177
+winner,0.0,fp16,s2_test,all,0.7147648327078177
+winner,0.0,fp32,heo_test,2.5,0.5048304237896276
+winner,0.0,fp32,heo_test,5.0,0.5152652498230458
+winner,0.0,fp32,heo_test,10.0,0.4248518270370561
+winner,0.0,fp32,heo_test,all,0.5017101431869607
+winner,0.0,fp32,phisat2_test,4.75,0.8824818792974215
+winner,0.0,fp32,phisat2_test,10.0,0.8680993437359268
+winner,0.0,fp32,phisat2_test,all,0.8799958833348506
+winner,0.0,fp32,s2_test,10.0,0.7146164285144089
+winner,0.0,fp32,s2_test,all,0.7146164285144089
+smp:Unet:efficientnet-b0,0.0,fp16,heo_test,2.5,0.5084095697995115
+smp:Unet:efficientnet-b0,0.0,fp16,heo_test,5.0,0.5155073783672249
+smp:Unet:efficientnet-b0,0.0,fp16,heo_test,10.0,0.4725451166268929
+smp:Unet:efficientnet-b0,0.0,fp16,heo_test,all,0.5076127339819781
+smp:Unet:efficientnet-b0,0.0,fp16,phisat2_test,4.75,0.8804933185903497
+smp:Unet:efficientnet-b0,0.0,fp16,phisat2_test,10.0,0.8677551505035188
+smp:Unet:efficientnet-b0,0.0,fp16,phisat2_test,all,0.8782987606605072
+smp:Unet:efficientnet-b0,0.0,fp16,s2_test,10.0,0.7506635700066357
+smp:Unet:efficientnet-b0,0.0,fp16,s2_test,all,0.7506635700066357
+smp:Unet:efficientnet-b0,0.0,fp32,heo_test,2.5,0.5081337149880542
+smp:Unet:efficientnet-b0,0.0,fp32,heo_test,5.0,0.5152985937027753
+smp:Unet:efficientnet-b0,0.0,fp32,heo_test,10.0,0.472167281997187
+smp:Unet:efficientnet-b0,0.0,fp32,heo_test,all,0.5073420833912693
+smp:Unet:efficientnet-b0,0.0,fp32,phisat2_test,4.75,0.8806298909285641
+smp:Unet:efficientnet-b0,0.0,fp32,phisat2_test,10.0,0.867792960805864
+smp:Unet:efficientnet-b0,0.0,fp32,phisat2_test,all,0.8784181958098938
+smp:Unet:efficientnet-b0,0.0,fp32,s2_test,10.0,0.7502278942570647
+smp:Unet:efficientnet-b0,0.0,fp32,s2_test,all,0.7502278942570647
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,0.0,fp16,heo_test,2.5,0.5009359161767803
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,0.0,fp16,heo_test,5.0,0.5595827500910817
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,0.0,fp16,heo_test,10.0,0.4928101389227394
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,0.0,fp16,heo_test,all,0.5101377150240476
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,0.0,fp16,phisat2_test,4.75,0.8807782599444687
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,0.0,fp16,phisat2_test,10.0,0.8774794930699293
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,0.0,fp16,phisat2_test,all,0.8802106123171747
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,0.0,fp16,s2_test,10.0,0.7936507936507936
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,0.0,fp16,s2_test,all,0.7936507936507936
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,0.0,fp32,heo_test,2.5,0.5007509520133588
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,0.0,fp32,heo_test,5.0,0.5597429503165164
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,0.0,fp32,heo_test,10.0,0.4929646140986347
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,0.0,fp32,heo_test,all,0.5100276681886483
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,0.0,fp32,phisat2_test,4.75,0.8806904090819616
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,0.0,fp32,phisat2_test,10.0,0.8774557517968684
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,0.0,fp32,phisat2_test,all,0.8801337601955247
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,0.0,fp32,s2_test,10.0,0.7944032485875706
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,0.0,fp32,s2_test,all,0.7944032485875706
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,0.0,fp16,heo_test,2.5,0.3821495841699833
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,0.0,fp16,heo_test,5.0,0.389489870096178
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,0.0,fp16,heo_test,10.0,0.3985636316877328
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,0.0,fp16,heo_test,all,0.3842486275433179
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,0.0,fp16,phisat2_test,4.75,0.8751027874900887
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,0.0,fp16,phisat2_test,10.0,0.8622910990474946
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,0.0,fp16,phisat2_test,all,0.8728883098053839
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,0.0,fp16,s2_test,10.0,0.5711092315128081
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,0.0,fp16,s2_test,all,0.5711092315128081
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,0.0,fp32,heo_test,2.5,0.3820097423511939
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,0.0,fp32,heo_test,5.0,0.3894860280250096
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,0.0,fp32,heo_test,10.0,0.3985350567213083
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,0.0,fp32,heo_test,all,0.384137333279142
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,0.0,fp32,phisat2_test,4.75,0.8751544968702923
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,0.0,fp32,phisat2_test,10.0,0.8623205107540552
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,0.0,fp32,phisat2_test,all,0.872936166208541
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,0.0,fp32,s2_test,10.0,0.5699987941637525
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,0.0,fp32,s2_test,all,0.5699987941637525
+"winner, no_kd",0.0,fp16,heo_test,2.5,0.4796414300435302
+"winner, no_kd",0.0,fp16,heo_test,5.0,0.5520664611526203
+"winner, no_kd",0.0,fp16,heo_test,10.0,0.4179962743986393
+"winner, no_kd",0.0,fp16,heo_test,all,0.4876622066427554
+"winner, no_kd",0.0,fp16,phisat2_test,4.75,0.8605264527497853
+"winner, no_kd",0.0,fp16,phisat2_test,10.0,0.8584517522951404
+"winner, no_kd",0.0,fp16,phisat2_test,all,0.8601735369867198
+"winner, no_kd",0.0,fp16,s2_test,10.0,0.7807586390690238
+"winner, no_kd",0.0,fp16,s2_test,all,0.7807586390690238
+"winner, no_kd",0.0,fp32,heo_test,2.5,0.4793163691137615
+"winner, no_kd",0.0,fp32,heo_test,5.0,0.55119738832947
+"winner, no_kd",0.0,fp32,heo_test,10.0,0.4174391217766636
+"winner, no_kd",0.0,fp32,heo_test,all,0.4872330766941344
+"winner, no_kd",0.0,fp32,phisat2_test,4.75,0.8602016580090718
+"winner, no_kd",0.0,fp32,phisat2_test,10.0,0.8583971089852845
+"winner, no_kd",0.0,fp32,phisat2_test,all,0.8598947527366227
+"winner, no_kd",0.0,fp32,s2_test,10.0,0.7811166429587483
+"winner, no_kd",0.0,fp32,s2_test,all,0.7811166429587483
+"winner, fp32",0.0,fp16,heo_test,2.5,0.5291576126872211
+"winner, fp32",0.0,fp16,heo_test,5.0,0.5555323878277633
+"winner, fp32",0.0,fp16,heo_test,10.0,0.4598453952044085
+"winner, fp32",0.0,fp16,heo_test,all,0.529396042101521
+"winner, fp32",0.0,fp16,phisat2_test,4.75,0.8767213016086688
+"winner, fp32",0.0,fp16,phisat2_test,10.0,0.8656889534338115
+"winner, fp32",0.0,fp16,phisat2_test,all,0.8748249950683556
+"winner, fp32",0.0,fp16,s2_test,10.0,0.7262029499476103
+"winner, fp32",0.0,fp16,s2_test,all,0.7262029499476103
+"winner, fp32",0.0,fp32,heo_test,2.5,0.5292510570355696
+"winner, fp32",0.0,fp32,heo_test,5.0,0.5557590004685796
+"winner, fp32",0.0,fp32,heo_test,10.0,0.4600310905786788
+"winner, fp32",0.0,fp32,heo_test,all,0.5295185214252079
+"winner, fp32",0.0,fp32,phisat2_test,4.75,0.8766816412801736
+"winner, fp32",0.0,fp32,phisat2_test,10.0,0.8655806574608871
+"winner, fp32",0.0,fp32,phisat2_test,all,0.8747734901926515
+"winner, fp32",0.0,fp32,s2_test,10.0,0.7271406666128641
+"winner, fp32",0.0,fp32,s2_test,all,0.7271406666128641
+winner,1.0,fp16,heo_test,2.5,0.5314922476461393
+winner,1.0,fp16,heo_test,5.0,0.5481077094988882
+winner,1.0,fp16,heo_test,10.0,0.4993020229504318
+winner,1.0,fp16,heo_test,all,0.5326109336641766
+winner,1.0,fp16,phisat2_test,4.75,0.8883180798070274
+winner,1.0,fp16,phisat2_test,10.0,0.8640134229995039
+winner,1.0,fp16,phisat2_test,all,0.8841130541186993
+winner,1.0,fp16,s2_test,10.0,0.7366556836902801
+winner,1.0,fp16,s2_test,all,0.7366556836902801
+winner,1.0,fp32,heo_test,2.5,0.5317262523294659
+winner,1.0,fp32,heo_test,5.0,0.5480796007917931
+winner,1.0,fp32,heo_test,10.0,0.499508928043167
+winner,1.0,fp32,heo_test,all,0.5327976813354768
+winner,1.0,fp32,phisat2_test,4.75,0.8883313161459119
+winner,1.0,fp32,phisat2_test,10.0,0.8643242820603149
+winner,1.0,fp32,phisat2_test,all,0.8841777231966533
+winner,1.0,fp32,s2_test,10.0,0.7371240214256284
+winner,1.0,fp32,s2_test,all,0.7371240214256284
+smp:Unet:efficientnet-b0,1.0,fp16,heo_test,2.5,0.5190445487065916
+smp:Unet:efficientnet-b0,1.0,fp16,heo_test,5.0,0.5349558460443206
+smp:Unet:efficientnet-b0,1.0,fp16,heo_test,10.0,0.5105479758970791
+smp:Unet:efficientnet-b0,1.0,fp16,heo_test,all,0.5213257843831092
+smp:Unet:efficientnet-b0,1.0,fp16,phisat2_test,4.75,0.8805134338406482
+smp:Unet:efficientnet-b0,1.0,fp16,phisat2_test,10.0,0.8662112629409976
+smp:Unet:efficientnet-b0,1.0,fp16,phisat2_test,all,0.8780559371926603
+smp:Unet:efficientnet-b0,1.0,fp16,s2_test,10.0,0.78863576391943
+smp:Unet:efficientnet-b0,1.0,fp16,s2_test,all,0.78863576391943
+smp:Unet:efficientnet-b0,1.0,fp32,heo_test,2.5,0.5194548493447888
+smp:Unet:efficientnet-b0,1.0,fp32,heo_test,5.0,0.5352167109346286
+smp:Unet:efficientnet-b0,1.0,fp32,heo_test,10.0,0.5106362896279953
+smp:Unet:efficientnet-b0,1.0,fp32,heo_test,all,0.521692628309798
+smp:Unet:efficientnet-b0,1.0,fp32,phisat2_test,4.75,0.8805758196768089
+smp:Unet:efficientnet-b0,1.0,fp32,phisat2_test,10.0,0.8662235647469213
+smp:Unet:efficientnet-b0,1.0,fp32,phisat2_test,all,0.8781098364557857
+smp:Unet:efficientnet-b0,1.0,fp32,s2_test,10.0,0.7888067581837381
+smp:Unet:efficientnet-b0,1.0,fp32,s2_test,all,0.7888067581837381
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,1.0,fp16,heo_test,2.5,0.5043844049984787
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,1.0,fp16,heo_test,5.0,0.5771431543903454
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,1.0,fp16,heo_test,10.0,0.4947187249493092
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,1.0,fp16,heo_test,all,0.5156523877849141
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,1.0,fp16,phisat2_test,4.75,0.8820779357517601
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,1.0,fp16,phisat2_test,10.0,0.8598631799613413
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,1.0,fp16,phisat2_test,all,0.8782499686001999
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,1.0,fp16,s2_test,10.0,0.7744896208612112
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,1.0,fp16,s2_test,all,0.7744896208612112
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,1.0,fp32,heo_test,2.5,0.5040764505345655
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,1.0,fp32,heo_test,5.0,0.5772587751769842
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,1.0,fp32,heo_test,10.0,0.494918411620449
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,1.0,fp32,heo_test,all,0.5154337403162117
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,1.0,fp32,phisat2_test,4.75,0.8820970626741437
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,1.0,fp32,phisat2_test,10.0,0.8599171415564041
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,1.0,fp32,phisat2_test,all,0.8782750888805222
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,1.0,fp32,s2_test,10.0,0.7744509265614276
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,1.0,fp32,s2_test,all,0.7744509265614276
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,1.0,fp16,heo_test,2.5,0.3887254365492439
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,1.0,fp16,heo_test,5.0,0.379392110953452
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,1.0,fp16,heo_test,10.0,0.3787315336035092
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,1.0,fp16,heo_test,all,0.3865195487245991
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,1.0,fp16,phisat2_test,4.75,0.8732452234238716
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,1.0,fp16,phisat2_test,10.0,0.8577720121927982
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,1.0,fp16,phisat2_test,all,0.8705716682169506
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,1.0,fp16,s2_test,10.0,0.6245130960376092
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,1.0,fp16,s2_test,all,0.6245130960376092
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,1.0,fp32,heo_test,2.5,0.3890159512640955
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,1.0,fp32,heo_test,5.0,0.3798851417798134
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,1.0,fp32,heo_test,10.0,0.3790796919936914
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,1.0,fp32,heo_test,all,0.3868496977748191
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,1.0,fp32,phisat2_test,4.75,0.8732918750855649
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,1.0,fp32,phisat2_test,10.0,0.8578552317374016
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,1.0,fp32,phisat2_test,all,0.8706245418760383
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,1.0,fp32,s2_test,10.0,0.6253530598520511
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,1.0,fp32,s2_test,all,0.6253530598520511
+"winner, no_kd",1.0,fp16,heo_test,2.5,0.4052891417054112
+"winner, no_kd",1.0,fp16,heo_test,5.0,0.5550389701035325
+"winner, no_kd",1.0,fp16,heo_test,10.0,0.4779047208450097
+"winner, no_kd",1.0,fp16,heo_test,all,0.4283098511002998
+"winner, no_kd",1.0,fp16,phisat2_test,4.75,0.8759057276867604
+"winner, no_kd",1.0,fp16,phisat2_test,10.0,0.8576826606674022
+"winner, no_kd",1.0,fp16,phisat2_test,all,0.8727772768851452
+"winner, no_kd",1.0,fp16,s2_test,10.0,0.8322743318204741
+"winner, no_kd",1.0,fp16,s2_test,all,0.8322743318204741
+"winner, no_kd",1.0,fp32,heo_test,2.5,0.405225098991011
+"winner, no_kd",1.0,fp32,heo_test,5.0,0.5552245059472545
+"winner, no_kd",1.0,fp32,heo_test,10.0,0.4779703237086981
+"winner, no_kd",1.0,fp32,heo_test,all,0.4282876874390753
+"winner, no_kd",1.0,fp32,phisat2_test,4.75,0.8759186249918014
+"winner, no_kd",1.0,fp32,phisat2_test,10.0,0.8576837024362455
+"winner, no_kd",1.0,fp32,phisat2_test,all,0.8727881549877302
+"winner, no_kd",1.0,fp32,s2_test,10.0,0.8321903993545785
+"winner, no_kd",1.0,fp32,s2_test,all,0.8321903993545785
+"winner, fp32",1.0,fp16,heo_test,2.5,0.5180217500395731
+"winner, fp32",1.0,fp16,heo_test,5.0,0.5582229999027899
+"winner, fp32",1.0,fp16,heo_test,10.0,0.5030882249725102
+"winner, fp32",1.0,fp16,heo_test,all,0.5239434189985605
+"winner, fp32",1.0,fp16,phisat2_test,4.75,0.8789905449479063
+"winner, fp32",1.0,fp16,phisat2_test,10.0,0.8664651310771826
+"winner, fp32",1.0,fp16,phisat2_test,all,0.8768334705122881
+"winner, fp32",1.0,fp16,s2_test,10.0,0.7490202351435655
+"winner, fp32",1.0,fp16,s2_test,all,0.7490202351435655
+"winner, fp32",1.0,fp32,heo_test,2.5,0.5179582433793292
+"winner, fp32",1.0,fp32,heo_test,5.0,0.55817706672474
+"winner, fp32",1.0,fp32,heo_test,10.0,0.5036075712143928
+"winner, fp32",1.0,fp32,heo_test,all,0.523916359401529
+"winner, fp32",1.0,fp32,phisat2_test,4.75,0.8789761033893294
+"winner, fp32",1.0,fp32,phisat2_test,10.0,0.8664718556870913
+"winner, fp32",1.0,fp32,phisat2_test,all,0.8768226751016218
+"winner, fp32",1.0,fp32,s2_test,10.0,0.7492
+"winner, fp32",1.0,fp32,s2_test,all,0.7492
+winner,2.0,fp16,heo_test,2.5,0.5134095124219038
+winner,2.0,fp16,heo_test,5.0,0.5446659582332286
+winner,2.0,fp16,heo_test,10.0,0.4368288159921212
+winner,2.0,fp16,heo_test,all,0.5139259127776419
+winner,2.0,fp16,phisat2_test,4.75,0.8906009472179414
+winner,2.0,fp16,phisat2_test,10.0,0.8627325414515208
+winner,2.0,fp16,phisat2_test,all,0.885758932035578
+winner,2.0,fp16,s2_test,10.0,0.7929092988475411
+winner,2.0,fp16,s2_test,all,0.7929092988475411
+winner,2.0,fp32,heo_test,2.5,0.5134191662262156
+winner,2.0,fp32,heo_test,5.0,0.5442941036120283
+winner,2.0,fp32,heo_test,10.0,0.4362578362934201
+winner,2.0,fp32,heo_test,all,0.5138343453896901
+winner,2.0,fp32,phisat2_test,4.75,0.890503801361674
+winner,2.0,fp32,phisat2_test,10.0,0.8626216876075822
+winner,2.0,fp32,phisat2_test,all,0.8856591374027474
+winner,2.0,fp32,s2_test,10.0,0.7931884185514388
+winner,2.0,fp32,s2_test,all,0.7931884185514388
+smp:Unet:efficientnet-b0,2.0,fp16,heo_test,2.5,0.5453233950468863
+smp:Unet:efficientnet-b0,2.0,fp16,heo_test,5.0,0.5595986539566044
+smp:Unet:efficientnet-b0,2.0,fp16,heo_test,10.0,0.5136906826800005
+smp:Unet:efficientnet-b0,2.0,fp16,heo_test,all,0.5460457831555424
+smp:Unet:efficientnet-b0,2.0,fp16,phisat2_test,4.75,0.8844396785574643
+smp:Unet:efficientnet-b0,2.0,fp16,phisat2_test,10.0,0.8664786847457557
+smp:Unet:efficientnet-b0,2.0,fp16,phisat2_test,all,0.8813410285749822
+smp:Unet:efficientnet-b0,2.0,fp16,s2_test,10.0,0.8290370097587921
+smp:Unet:efficientnet-b0,2.0,fp16,s2_test,all,0.8290370097587921
+smp:Unet:efficientnet-b0,2.0,fp32,heo_test,2.5,0.5454223962615591
+smp:Unet:efficientnet-b0,2.0,fp32,heo_test,5.0,0.5598518889938866
+smp:Unet:efficientnet-b0,2.0,fp32,heo_test,10.0,0.5134220159341579
+smp:Unet:efficientnet-b0,2.0,fp32,heo_test,all,0.5461498253797769
+smp:Unet:efficientnet-b0,2.0,fp32,phisat2_test,4.75,0.8843775729038007
+smp:Unet:efficientnet-b0,2.0,fp32,phisat2_test,10.0,0.8663616492211904
+smp:Unet:efficientnet-b0,2.0,fp32,phisat2_test,all,0.8812692657925548
+smp:Unet:efficientnet-b0,2.0,fp32,s2_test,10.0,0.8292660465972925
+smp:Unet:efficientnet-b0,2.0,fp32,s2_test,all,0.8292660465972925
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,2.0,fp16,heo_test,2.5,0.5274005532368536
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,2.0,fp16,heo_test,5.0,0.5749030330005722
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,2.0,fp16,heo_test,10.0,0.5160954215582937
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,2.0,fp16,heo_test,all,0.5348348504340822
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,2.0,fp16,phisat2_test,4.75,0.8755206980748791
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,2.0,fp16,phisat2_test,10.0,0.8679635258775295
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,2.0,fp16,phisat2_test,all,0.8742191788437577
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,2.0,fp16,s2_test,10.0,0.650390625
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,2.0,fp16,s2_test,all,0.650390625
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,2.0,fp32,heo_test,2.5,0.5277014454481673
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,2.0,fp32,heo_test,5.0,0.5750021863049856
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,2.0,fp32,heo_test,10.0,0.5161825826699141
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,2.0,fp32,heo_test,all,0.5350917455963193
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,2.0,fp32,phisat2_test,4.75,0.8756105657514108
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,2.0,fp32,phisat2_test,10.0,0.8679207421635561
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,2.0,fp32,phisat2_test,all,0.874286099496132
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,2.0,fp32,s2_test,10.0,0.6512748864827105
+smp:Unet:efficientnet-b0:depth=4:decoder=64-32-16-8,2.0,fp32,s2_test,all,0.6512748864827105
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,2.0,fp16,heo_test,2.5,0.441785581029873
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,2.0,fp16,heo_test,5.0,0.5250501439705288
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,2.0,fp16,heo_test,10.0,0.4518429161789647
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,2.0,fp16,heo_test,all,0.455341821470177
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,2.0,fp16,phisat2_test,4.75,0.8779875562389381
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,2.0,fp16,phisat2_test,10.0,0.8575221970547664
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,2.0,fp16,phisat2_test,all,0.8744716070072818
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,2.0,fp16,s2_test,10.0,0.5813331712948897
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,2.0,fp16,s2_test,all,0.5813331712948897
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,2.0,fp32,heo_test,2.5,0.4419556197420441
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,2.0,fp32,heo_test,5.0,0.5249954507406194
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,2.0,fp32,heo_test,10.0,0.4512187839629289
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,2.0,fp32,heo_test,all,0.4554455558770285
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,2.0,fp32,phisat2_test,4.75,0.8780895415813075
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,2.0,fp32,phisat2_test,10.0,0.8576040280961439
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,2.0,fp32,phisat2_test,all,0.8745695485576745
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,2.0,fp32,s2_test,10.0,0.5815551097331145
+smp:Unet:mobilenet_v2:depth=4:decoder=64-32-16-8,2.0,fp32,s2_test,all,0.5815551097331145
+"winner, no_kd",2.0,fp16,heo_test,2.5,0.3703945013163089
+"winner, no_kd",2.0,fp16,heo_test,5.0,0.4786974904256519
+"winner, no_kd",2.0,fp16,heo_test,10.0,0.4546217388461455
+"winner, no_kd",2.0,fp16,heo_test,all,0.3893397955993883
+"winner, no_kd",2.0,fp16,phisat2_test,4.75,0.8732291187956074
+"winner, no_kd",2.0,fp16,phisat2_test,10.0,0.8464807342373152
+"winner, no_kd",2.0,fp16,phisat2_test,all,0.8685766169703851
+"winner, no_kd",2.0,fp16,s2_test,10.0,0.7536319612590799
+"winner, no_kd",2.0,fp16,s2_test,all,0.7536319612590799
+"winner, no_kd",2.0,fp32,heo_test,2.5,0.3703565446664396
+"winner, no_kd",2.0,fp32,heo_test,5.0,0.4782719675397217
+"winner, no_kd",2.0,fp32,heo_test,10.0,0.4539625517091226
+"winner, no_kd",2.0,fp32,heo_test,all,0.389227131786218
+"winner, no_kd",2.0,fp32,phisat2_test,4.75,0.8734595578358703
+"winner, no_kd",2.0,fp32,phisat2_test,10.0,0.8464994835391124
+"winner, no_kd",2.0,fp32,phisat2_test,all,0.8687702328210234
+"winner, no_kd",2.0,fp32,s2_test,10.0,0.7541778508961815
+"winner, no_kd",2.0,fp32,s2_test,all,0.7541778508961815
+"winner, fp32",2.0,fp16,heo_test,2.5,0.4925846464312934
+"winner, fp32",2.0,fp16,heo_test,5.0,0.5555772477232794
+"winner, fp32",2.0,fp16,heo_test,10.0,0.4650691904106677
+"winner, fp32",2.0,fp16,heo_test,all,0.5013410528594425
+"winner, fp32",2.0,fp16,phisat2_test,4.75,0.8747655164004738
+"winner, fp32",2.0,fp16,phisat2_test,10.0,0.8525078678003355
+"winner, fp32",2.0,fp16,phisat2_test,all,0.8709324348096646
+"winner, fp32",2.0,fp16,s2_test,10.0,0.7739093604404913
+"winner, fp32",2.0,fp16,s2_test,all,0.7739093604404913
+"winner, fp32",2.0,fp32,heo_test,2.5,0.4927486279184037
+"winner, fp32",2.0,fp32,heo_test,5.0,0.5556750714862635
+"winner, fp32",2.0,fp32,heo_test,10.0,0.4654606920175075
+"winner, fp32",2.0,fp32,heo_test,all,0.501509577762496
+"winner, fp32",2.0,fp32,phisat2_test,4.75,0.8748202238755278
+"winner, fp32",2.0,fp32,phisat2_test,10.0,0.8524549432637969
+"winner, fp32",2.0,fp32,phisat2_test,all,0.8709682173474269
+"winner, fp32",2.0,fp32,s2_test,10.0,0.7732927138867733
+"winner, fp32",2.0,fp32,s2_test,all,0.7732927138867733
+teacher,0.0,fp32,heo_test,2.5,0.4607038129743233
+teacher,0.0,fp32,heo_test,5.0,0.5023926180852623
+teacher,0.0,fp32,heo_test,10.0,0.4500903342366757
+teacher,0.0,fp32,heo_test,all,0.4669899179817677
+teacher,0.0,fp32,phisat2_test,4.75,0.8816582912398483
+teacher,0.0,fp32,phisat2_test,10.0,0.8415795356398053
+teacher,0.0,fp32,phisat2_test,all,0.8746922604228083
+teacher,0.0,fp32,s2_test,10.0,0.4971702689591979
+teacher,0.0,fp32,s2_test,all,0.4971702689591979
+teacher,1.0,fp32,heo_test,2.5,0.4757485112147023
+teacher,1.0,fp32,heo_test,5.0,0.4950218129774283
+teacher,1.0,fp32,heo_test,10.0,0.4276670520760592
+teacher,1.0,fp32,heo_test,all,0.4765708748950223
+teacher,1.0,fp32,phisat2_test,4.75,0.8804673239982828
+teacher,1.0,fp32,phisat2_test,10.0,0.8520607931632057
+teacher,1.0,fp32,phisat2_test,all,0.8755334266864064
+teacher,1.0,fp32,s2_test,10.0,0.5887603102302105
+teacher,1.0,fp32,s2_test,all,0.5887603102302105
+"teacher, mean of seeds",,fp32,heo_test,2.5,0.481992636065289
+"teacher, mean of seeds",,fp32,heo_test,5.0,0.5133659128587992
+"teacher, mean of seeds",,fp32,heo_test,10.0,0.4479116271569102
+"teacher, mean of seeds",,fp32,heo_test,all,0.4854570188899971
+"teacher, mean of seeds",,fp32,phisat2_test,4.75,0.8855551276177157
+"teacher, mean of seeds",,fp32,phisat2_test,10.0,0.8535732521838064
+"teacher, mean of seeds",,fp32,phisat2_test,all,0.8799914116699404
+"teacher, mean of seeds",,fp32,s2_test,10.0,0.5652718916015043
+"teacher, mean of seeds",,fp32,s2_test,all,0.5652718916015043
